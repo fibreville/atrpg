@@ -11,12 +11,21 @@ isset($cleanPost['traitre']) ? $traitre = $cleanPost['traitre'] : $traitre = "";
 
 $id = $_SESSION['id'];
 if ($choix != "") {
-  $stmt = $db->prepare("UPDATE hrpg SET vote=:choix,active=:active WHERE id=:id");
-  $stmt->execute([
-    ':choix' => $choix,
-    ':id' => $id,
-    ':active' => 1
-  ]);
+  
+  // here we check if a vote is running to prevent submitting after the poll has closed
+   $verif = $db->prepare("SELECT choix FROM sondage");
+   $verif->execute();
+   $row = $verif->fetch();
+   $valide = $row[0];
+  if ($valide != "") {
+    // here we do the vote
+    $stmt = $db->prepare("UPDATE hrpg SET vote=:choix,active=:active WHERE id=:id");
+    $stmt->execute([
+      ':choix' => $choix,
+      ':id' => $id,
+      ':active' => 1
+    ]);
+  }
 }
 
 if ($lead == 1) {
